@@ -1,5 +1,4 @@
 version: '3'
-
 services:
   snipeit:
     build:
@@ -7,9 +6,9 @@ services:
       dockerfile: Dockerfile.alpine
     container_name: snipeit
     ports:
-    - "8080:80"
+    - "8000:80"
     volumes:
-    - ./logs:/var/www/html/storage/logs
+    - ./storage/logs:/var/www/html/storage/logs
     depends_on:
     - mariadb
     - redis
@@ -17,24 +16,20 @@ services:
     - .env.docker
     networks:
     - snipeit-backend
-
   mariadb:
     image: mariadb:10.6.4-focal
     volumes:
-    - ./Mysqldump:/var/lib/mysql
-    - ./Mysqldump:/docker-entrypoint-initdb.d
+    - db:/var/lib/mysql
     env_file:
     - .env.docker
     networks:
     - snipeit-backend
     ports:
       - "3306:3306"
-
   redis:
     image: redis:6.2.5-buster
     networks:
     - snipeit-backend
-
   mailhog:
     image: mailhog/mailhog:v1.0.1
     ports:
@@ -42,10 +37,21 @@ services:
     - "8025:8025"
     networks:
     - snipeit-backend
-
-
+  Grafana:
+    image: grafana/grafana
+    ports:
+    # - 1025:1025
+    - "3000:3000"
+    networks:
+    - snipeit-backend  
+  Prometheus:
+    image: prom/prometheus
+    ports:
+    # - 1025:1025
+    - "9090:9090"
+    networks:
+    - snipeit-backend
 volumes:
-  Mysqldump: {}
-
+  db: {}
 networks:
   snipeit-backend: {}
